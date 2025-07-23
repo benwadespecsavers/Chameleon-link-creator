@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chameleon Link Converter</title>
+  <style>
+    body {
+      background-color: #1c1e26;
+      color: #ffffff;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #2a2d3a;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #3a3e4c;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #00c875;
+    }
+
+    .output {
+      display: none;
+      margin-top: 1rem;
+      background-color: #3a3e4c;
+      padding: 1rem;
+      border-radius: 8px;
+      word-break: break-all;
+      font-family: monospace;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔗 Chameleon Link Converter</h1>
+    <p>Input the review link and it will create the preview link which can be sent to anyone.</p>
+    <input type="text" id="inputUrl" placeholder="Paste Chameleon review link here..." />
+    <div class="output" id="outputLink" title="Click to highlight"></div>
+  </div>
+
+  <script>
+    const input = document.getElementById("inputUrl");
+    const output = document.getElementById("outputLink");
+
+    input.addEventListener("input", () => {
+      const raw = input.value.trim();
+
+      try {
+        const url = new URL(raw);
+        const pathParts = url.pathname.split("/");
+
+        if (
+          pathParts.length >= 7 &&
+          pathParts[1] === "account" &&
+          pathParts[3] === "creator" &&
+          pathParts[4] === "projects" &&
+          pathParts[6].startsWith("review")
+        ) {
+          const accountId = pathParts[2];
+          const projectName = pathParts[5];
+          const newUrl = `https://v2.chameleoncreator.com/preview/${accountId}/${projectName}`;
+          output.textContent = newUrl;
+          output.style.display = "block";
+        } else {
+          output.textContent = "❌ Not a valid Chameleon Creator review URL.";
+          output.style.display = "block";
+        }
+      } catch {
+        output.textContent = "";
+        output.style.display = "none";
+      }
+    });
+
+    output.addEventListener("click", () => {
+      const range = document.createRange();
+      range.selectNodeContents(output);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
+  </script>
+</body>
+</html>
