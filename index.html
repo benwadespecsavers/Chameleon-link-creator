@@ -49,7 +49,7 @@
       background-color: #3a3e4c;
       padding: 1rem;
       border-radius: 8px;
-      word-break: break-all;
+      word-break: break-word;
       font-family: monospace;
       cursor: pointer;
     }
@@ -58,7 +58,6 @@
 <body>
   <div class="container">
     <h1>🔗 Chameleon Link Converter</h1>
-    <p>Input the review link and it will create the preview link which can be sent to anyone.</p>
     <input type="text" id="inputUrl" placeholder="Paste Chameleon review link here..." />
     <div class="output" id="outputLink" title="Click to highlight"></div>
   </div>
@@ -69,20 +68,29 @@
 
     input.addEventListener("input", () => {
       const raw = input.value.trim();
+      output.style.display = "none";
+      output.textContent = "";
 
       try {
         const url = new URL(raw);
-        const pathParts = url.pathname.split("/");
+        const path = url.pathname;
 
-        if (
-          pathParts.length >= 7 &&
-          pathParts[1] === "account" &&
-          pathParts[3] === "creator" &&
-          pathParts[4] === "projects" &&
-          pathParts[6].startsWith("review")
-        ) {
-          const accountId = pathParts[2];
-          const projectName = pathParts[5];
+        // Match both types of URLs using regex
+        const match1 = path.match(/^\/account\/([^\/]+)\/creator\/projects\/([^\/]+)\/review/);
+        const match2 = path.match(/^\/account\/([^\/]+)\/review\/projects\/([^\/]+)/);
+
+        let accountId = "";
+        let projectName = "";
+
+        if (match1) {
+          accountId = match1[1];
+          projectName = match1[2];
+        } else if (match2) {
+          accountId = match2[1];
+          projectName = match2[2];
+        }
+
+        if (accountId && projectName) {
           const newUrl = `https://v2.chameleoncreator.com/preview/${accountId}/${projectName}`;
           output.textContent = newUrl;
           output.style.display = "block";
